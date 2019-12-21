@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * @Author: goodtimp
  * @Date: 2019/10/9 16:26
- * @description :
+ * @description : 某些工具类
  */
 public class Tools {
     /**
@@ -63,5 +63,23 @@ public class Tools {
     public static String dataAddSaltAndMD5(String str, int length) {
         String saltStr = str + getRandomString(length);
         return DigestUtils.md5DigestAsHex(saltStr.getBytes());
+    }
+
+    /*=====================    author ipso     =====================*/
+
+    /**
+     * 生成随机数字
+     * 用来生成手机验证码
+     * @author ipso
+     * @param num 生成数字的数量
+     * @return 随机数字字符串
+     */
+    public static String createRandomNum(int num){
+        String randomNumStr = "";
+        for(int i = 0; i < num;i ++){
+            int randomNum = (int)Math.floor(Math.random() * 10);
+            randomNumStr += randomNum;
+        }
+        return randomNumStr;
     }
 }

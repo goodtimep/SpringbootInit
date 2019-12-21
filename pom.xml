@@ -32,7 +32,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional>
+            <version>1.18.10</version>
         </dependency>
         <!-- mybatis-plus!  -->
         <dependency>
@@ -80,21 +80,22 @@
             <version>1.4.0</version>
         </dependency>
         <!--alibaba easyexcel-->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>easyexcel</artifactId>
-            <version>1.1.2-beta5</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba</groupId>-->
+<!--            <artifactId>easyexcel</artifactId>-->
+<!--            <version>1.1.2-beta5</version>-->
+<!--        </dependency>-->
         <!-- Fastjson 未测试-->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.15</version>
+            <version>1.2.60</version>
         </dependency>
 
     </dependencies>
 
     <build>
+        <finalName>buildBackEnd</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

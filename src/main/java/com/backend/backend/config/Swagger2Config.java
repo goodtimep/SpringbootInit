@@ -20,8 +20,8 @@ public class Swagger2Config {
     public Docket createRestApi() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(new ApiInfoBuilder()
-                        .title("goodtimp backend.0")
-                        .description("goodtimp的博客")
+                        .title("CICS")
+                        .description("cics信息交流")
                         .version("2.0.0")
                         .contact(new Contact("goodtimp", null, null))
                         .build())

@@ -1,5 +1,6 @@
 package com.backend.backend.jwt;
 
+import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.backend.backend.common.model.ResponseModel;
@@ -19,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import static com.backend.backend.enums.TokenEnum.PAYLOAD_USER_TAG;
+import static com.backend.backend.enums.TokenEnum.*;
 
 /**
  * @Author: goodtimp
@@ -158,17 +159,23 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         // 拿到当前Header中Authorization的AccessToken(Shiro中getAuthzHeader方法已经实现)
         String token = this.getAuthzHeader(request);
         // 获取当前Token的帐号信息
-        String userId = JwtUtil.getClaim(token, PAYLOAD_USER_TAG.getCode());
+        String userId = JwtUtil.getClaim(token, PAYLOAD_USER_ID_TAG.getCode());
+        String type = JwtUtil.getClaim(token, PAYLOAD_USER_TYPE_TAG.getCode());
+        String name = JwtUtil.getClaim(token, PAYLOAD_USER_NAME_TAG.getCode());
         // 判断Redis中RefreshToken是否存在是否与传入的token匹配
 
         if (JwtUtil.judgeRefreshToken(token)) {
+            // -----  单点登陆需要
             // 获取当前最新时间戳
-            String currentTimeMillis = String.valueOf(System.currentTimeMillis());
+//            String currentTimeMillis = String.valueOf(System.currentTimeMillis());
             // 设置RefreshToken中的时间戳为当前最新时间戳 ,不重置过期时间
-            JwtUtil.updateRefreshToken(userId, currentTimeMillis);
+//            JwtUtil.updateRefreshToken(userId, name, currentTimeMillis);
 //            RedisUtil.setAndNotExpire(RedisEnum.REFRESH_TOKEN_PREFIX.getCode() + userId, currentTimeMillis);
             // 刷新AccessToken，设置时间戳为当前最新时间戳
-            token = JwtUtil.sign(userId, currentTimeMillis);
+//            token = JwtUtil.sign(userId, name, currentTimeMillis);
+
+            // ----非单点登录直接重新返回token 不刷新refreshToken
+            token = JwtUtil.signAndIssueToken(userId, name, type, token);
             // 将新刷新的AccessToken再次进行Shiro的登录
             JwtToken jwtToken = new JwtToken(token);
             // 提交给UserRealm进行认证，如果错误他会抛出异常并被捕获，如果没有抛出异常则代表登入成功，返回true
@@ -192,7 +199,7 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         httpServletResponse.setCharacterEncoding("UTF-8");
         httpServletResponse.setContentType("application/json; charset=utf-8");
         try (PrintWriter out = httpServletResponse.getWriter()) {
-            String data = ResponseModel.fail(HttpStatus.UNAUTHORIZED.value(), "无权访问(Unauthorized):" + msg).toString();
+            String data = ResponseModel.fail(HttpStatus.UNAUTHORIZED.value(), "无权访问(Unauthorized):" + msg).toJsonString();
             out.append(data);
         } catch (IOException e) {
             logger.error("直接返回Response信息出现IOException异常:" + e.getMessage());

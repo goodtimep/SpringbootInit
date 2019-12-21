@@ -1,7 +1,7 @@
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为80
-  port: 8000
+  port: 8081
   tomcat:
     # tomcat的URI编码
     uri-encoding: UTF-8
@@ -15,18 +15,25 @@ spring:
   #配置数据库
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://47.107.80.19:3306/blog2?useUnicode=true&characterEncoding=utf8
-    username:
-    password:
+    url: jdbc:mysql://www.gqiming.wang:3306/cics?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&allowMultiQueries=true&useAffectedRows=true
+    username: ipso
+    password: gao1975386453
   # 配置redis
   redis:
-    host: 127.0.0.1
-    #    password: ""
+    host: 47.107.80.19
+    #  password: ""
+    #  数据库索引 默认0
+    password: "mni722"
     # 数据库索引 默认0
     database: 0
     port: 6379
     # 超时时间 Duration类型 3秒
-    timeout: 3S
+    timeout: 30S
+  servlet:
+    multipart:
+      # 文件上传大小限制
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 # logback
 logging:
@@ -58,7 +65,7 @@ mybatis-plus:
     field-strategy: 2
     # 驼峰下划线转换
     mapUnderscoreToCamelCase: true
-#    db-column-underline: true
+    #    db-column-underline: true
     # 刷新mapper 调试神器
     refresh-mapper: true
     # 数据库大写下划线转换

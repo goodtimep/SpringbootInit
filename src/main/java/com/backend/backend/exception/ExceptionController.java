@@ -7,16 +7,20 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @Author: goodtimp
  * @Date: 2019/10/23 15:45
  * @description :  异常拦截
  */
-@RestControllerAdvice
+@ControllerAdvice
 public class ExceptionController {
 
     private final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
@@ -32,7 +36,6 @@ public class ExceptionController {
     }
 
     // 捕捉shiro的异常
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(TokenException.class)
     @ResponseBody
     public ResponseModel handle401(TokenException e) {
@@ -42,7 +45,7 @@ public class ExceptionController {
     }
 
     // 捕捉UnauthorizedException
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseBody
     public ResponseModel handle401() {
@@ -51,14 +54,12 @@ public class ExceptionController {
         return ResponseModel.fail(401, "无权访问！");
     }
 
-    // 捕捉其他所有异常
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public ResponseModel globalException(HttpServletRequest request, Throwable ex) {
-        System.out.println(ex.getMessage());
-        logger.error(ex.getMessage());
-        return ResponseModel.fail(getStatus(request).value(), ex.getMessage());
+    public ResponseModel globalException(HttpServletRequest request, Exception e) {
+        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
+        return ResponseModel.fail(getStatus(request).value(), e.getMessage());
     }
 
     private HttpStatus getStatus(HttpServletRequest request) {

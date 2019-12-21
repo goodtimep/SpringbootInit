@@ -1,5 +1,8 @@
 package com.backend.backend.common.model;
 
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.http.HttpStatus;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +37,7 @@ public class ResponseModel {
         this.msg = value;
     }
 
-    public Map<String, Object> setExtend() {
+    public Map<String, Object> getExtend() {
         return this.extend;
     }
 
@@ -203,12 +206,26 @@ public class ResponseModel {
     /**
      * 添加一个msg  调用时应先调用 该类内 静态方法 方法
      *
-     * @param key
-     * @param value
+     * @param msg
      * @return
      */
     public ResponseModel addMsg(String msg) {
         this.setMsg(msg);
         return this;
+    }
+
+    /**
+     * 返回responseModel的json对象
+     *
+     * @return
+     */
+    public String toJsonString() {
+        try {
+            JSONObject json = new JSONObject();
+            return json.toJSONString(this);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return "";
     }
 }

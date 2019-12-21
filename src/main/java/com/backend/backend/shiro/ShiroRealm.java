@@ -1,8 +1,10 @@
 package com.backend.backend.shiro;
 
 import com.backend.backend.common.utils.StringUtil;
+import com.backend.backend.enums.SysDictEnum;
 import com.backend.backend.jwt.JwtToken;
 import com.backend.backend.jwt.JwtUtil;
+import com.backend.backend.model.entity.sys.SysPermission;
 import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -17,8 +19,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.backend.backend.enums.TokenEnum.PAYLOAD_ROLE_TAG;
-import static com.backend.backend.enums.TokenEnum.PAYLOAD_USER_TAG;
+import java.util.List;
+
+import static com.backend.backend.enums.TokenEnum.PAYLOAD_USER_ID_TAG;
 
 /**
  * @Author: goodtimp
@@ -48,15 +51,17 @@ public class ShiroRealm extends AuthorizingRealm {
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
-        String userId = JwtUtil.getClaim(principalCollection.toString(), PAYLOAD_USER_TAG.getCode());
+        // 获取当前登录的用户权限
+        List<SysPermission> temp = JwtUtil.getPermissionByToken(null);
+        // temp==null 时未登录
+        if (temp != null) {
+            // 从redis中获取角色对应的数据
+            // ------- code --------
+            temp.stream().forEach(e -> simpleAuthorizationInfo.addStringPermission(e.getPerCode()));
 
-        String roleIds = JwtUtil.getClaim(principalCollection.toString(), PAYLOAD_ROLE_TAG.getCode());
-
-        // 从redis中获取角色对应的数据
-        // ------- code --------
-
-        simpleAuthorizationInfo.addStringPermission("user:test");
-
+            // 用户已登录权限
+            simpleAuthorizationInfo.addStringPermission(SysDictEnum.PERMISSION_USER_LOGGED_ON.getCode());
+        }
         return simpleAuthorizationInfo;
     }
 
@@ -71,13 +76,13 @@ public class ShiroRealm extends AuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
         String token = (String) authenticationToken.getCredentials();
         // 解密获得account，用于和数据库进行对比
-        String userId = JwtUtil.getClaim(token, PAYLOAD_USER_TAG.getCode());
+        String userId = JwtUtil.getClaim(token, PAYLOAD_USER_ID_TAG.getCode());
         // 帐号为空
         if (StringUtil.isBlank(userId)) {
             throw new AuthenticationException("Token中帐号为空(The account in Token is empty.)");
         }
         // 查询用户是否存在 todo: 是否可以去除用户查询，当删除用户时refreshToken也会被删除？
-//        User user = userServiceImpl.getById(Long.parseLong(userId));
+//        UserEnum user = userServiceImpl.getById(Long.parseLong(userId));
 //        if (user == null) {
 //            throw new AuthenticationException("该帐号不存在(The account does not exist.)");
 //        }

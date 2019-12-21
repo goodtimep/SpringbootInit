@@ -2,15 +2,15 @@ package com.backend.backend.shiro.cache;
 
 import com.backend.backend.enums.TokenEnum;
 import com.backend.backend.jwt.JwtUtil;
+import com.backend.backend.redis.RedisUtil;
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-import static com.backend.backend.enums.RedisEnum.SHIRO_CACHE_PERFIX;
+import static com.backend.backend.enums.RedisEnum.REFRESH_TOKEN_PREFIX;
+import static com.backend.backend.enums.RedisEnum.SHIRO_CACHE_PREFIX;
+import static com.backend.backend.enums.TokenEnum.SHIRO_CACHE_EXPIRE_TIME;
 
 /**
  * 重写Shiro的Cache保存读取
@@ -29,7 +29,7 @@ public class CustomCache<K, V> implements Cache<K, V> {
      * @date 2018/9/4 18:33
      */
     private String getKey(Object key) {
-        return SHIRO_CACHE_PERFIX.getCode() + JwtUtil.getClaim(key.toString(), TokenEnum.PAYLOAD_USER_TAG.getCode());
+        return SHIRO_CACHE_PREFIX.getCode() + JwtUtil.getClaim(key.toString(), TokenEnum.PAYLOAD_USER_ID_TAG.getCode());
     }
 
     /**
@@ -37,8 +37,7 @@ public class CustomCache<K, V> implements Cache<K, V> {
      */
     @Override
     public Object get(Object key) throws CacheException {
-        return null;
-//        return RedisUtil.get(this.getKey(key));
+        return RedisUtil.get(this.getKey(key));
     }
 
     /**
@@ -48,8 +47,7 @@ public class CustomCache<K, V> implements Cache<K, V> {
     public Object put(Object key, Object value) throws CacheException {
         // 读取配置文件，获取Redis的Shiro缓存过期时间
         // 设置Redis的Shiro缓存 似乎没什么用
-//        return RedisUtil.set(this.getKey(key), value, Long.parseLong(SHIRO_CACHE_EXPIRE_TIME.getCode()));
-        return null;
+        return RedisUtil.set(this.getKey(key), value, Long.parseLong(SHIRO_CACHE_EXPIRE_TIME.getCode()));
     }
 
 
@@ -58,7 +56,7 @@ public class CustomCache<K, V> implements Cache<K, V> {
      */
     @Override
     public Object remove(Object key) throws CacheException {
-//        RedisUtil.del(this.getKey(key));
+        RedisUtil.del(this.getKey(key));
         return null;
     }
 
@@ -67,7 +65,7 @@ public class CustomCache<K, V> implements Cache<K, V> {
      */
     @Override
     public void clear() throws CacheException {
-//        RedisUtil.clear(REFRESH_TOKEN_PREFIX.getCode());
+        RedisUtil.clear(REFRESH_TOKEN_PREFIX.getCode());
     }
 
     /**
@@ -75,8 +73,7 @@ public class CustomCache<K, V> implements Cache<K, V> {
      */
     @Override
     public int size() {
-//        return RedisUtil.getAllKeyLength(REFRESH_TOKEN_PREFIX.getCode());
-        return 0;
+        return RedisUtil.getAllKeyLength(REFRESH_TOKEN_PREFIX.getCode());
     }
 
     /**
@@ -84,8 +81,7 @@ public class CustomCache<K, V> implements Cache<K, V> {
      */
     @Override
     public Set keys() {
-//        return RedisUtil.getAllKey(REFRESH_TOKEN_PREFIX.getCode());
-        return new HashSet();
+        return RedisUtil.getAllKey(REFRESH_TOKEN_PREFIX.getCode());
     }
 
     /**
@@ -93,12 +89,11 @@ public class CustomCache<K, V> implements Cache<K, V> {
      */
     @Override
     public Collection values() {
-//        Set keys = this.keys();
-//        List<Object> values = new ArrayList<Object>();
-//        for (Object key : keys) {
-//            values.add(RedisUtil.get(key.toString()));
-//        }
-//        return values;
-        return new ArrayList();
+        Set keys = this.keys();
+        List<Object> values = new ArrayList<Object>();
+        for (Object key : keys) {
+            values.add(RedisUtil.get(key.toString()));
+        }
+        return values;
     }
 }

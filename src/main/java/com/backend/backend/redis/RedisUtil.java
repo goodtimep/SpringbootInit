@@ -53,7 +53,6 @@ public class RedisUtil {
      * 获取key的失效时间(毫秒)
      *
      * @param key
-     * @param time 时间（ms>0）
      * @return 毫秒 0 永久有效
      */
     public static Long getExpire(String key) {
@@ -74,7 +73,7 @@ public class RedisUtil {
     /**
      * 得到前缀为传入值所有的key
      *
-     * @param prefix 要求含有的前缀
+     * @param prefix 要求含有的前缀，不传清除所有
      * @return
      */
     public static Set getAllKey(String... prefix) {
@@ -83,7 +82,8 @@ public class RedisUtil {
             keys.containsAll(redisTemplate.keys("*"));
         } else {
             for (String item : prefix) {
-                keys.containsAll(redisTemplate.keys(item + "*"));
+                Set<String> keyRedis = redisTemplate.keys(item + "*");
+                keys.addAll(keyRedis);
             }
         }
         return keys;
@@ -155,6 +155,10 @@ public class RedisUtil {
      */
     public static Boolean setAndNotExpire(String key, Object value) {
         try {
+            System.out.println("------------------------------------------------------");
+            System.out.println(getExpire(key));
+            System.out.println("------------------------------------------------------");
+            if (getExpire(key).equals(-2L)) return false;
             set(key, value, getExpire(key));
             return true;
         } catch (Exception e) {
@@ -168,7 +172,7 @@ public class RedisUtil {
      *
      * @param key
      * @param value
-     * @param time  time（秒）要大于0 如果time小于等于0 将设置无限期
+     * @param time  time（毫秒）要大于0 如果time小于等于0 将设置无限期
      * @return true 成功  false 失败
      */
     public static Boolean set(String key, Object value, Long time) {
@@ -506,8 +510,8 @@ public class RedisUtil {
     /**
      * 取key与other key的交集
      *
-     * @param key      不能为null
-     * @param otherKey 不能为null
+     * @param key       不能为null
+     * @param otherKeys 不能为null
      * @return 集合
      */
     public static Set<Object> intersect(String key, String... otherKeys) {
@@ -524,8 +528,8 @@ public class RedisUtil {
     /**
      * 取key与other key的并集
      *
-     * @param key      不能为null
-     * @param otherKey 不能为null
+     * @param key       不能为null
+     * @param otherKeys 不能为null
      * @return 集合
      */
     public static Set<Object> union(String key, String... otherKeys) {
